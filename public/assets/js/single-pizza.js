@@ -110,6 +110,7 @@ function handleNewCommentSubmit(event) {
 
   const formData = { commentBody, writtenBy };
 
+  // function that creates new comment
   fetch(`/api/comments/${pizzaId}`, {
     method: 'post',
     headers: {
@@ -151,6 +152,29 @@ function handleNewReplySubmit(event) {
   }
 
   const formData = { writtenBy, replyBody };
+
+  // function that creates new reply to comment
+  fetch(`/api/comments/${pizzaId}/${commentId}`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+      response.json();
+    })
+    .then(commentResponse => {
+      console.log(commentResponse);
+      location.reload();
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 
 $backBtn.addEventListener('click', function() {
