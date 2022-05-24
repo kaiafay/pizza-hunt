@@ -39,3 +39,44 @@ function saveRecord(record) {
     // add record to the store with add method
     pizzaObjectStore.add(record);
 };
+
+// function that uploads pizza data once internect connection is restored
+function uploadPizza() {
+    const transaction = db.transaction(['new_pizza'], 'readwrite');
+    const pizzaObjectStore = transaction.objectStore('new_pizza');
+
+    // get all records from store and set to a variable
+    const getAll = pizzaObjectStore.getAll();
+
+    // upon a successful .getAll() execution, run this function
+    getAll.onsuccess = function() {
+        // if there was data in IndexedDB's store, send it to the api server
+        if(getAll.result.length > 0) {
+            fetch('/api/pizzas', {
+                method: 'post',
+                body: JSON.stringify(getAll.result),
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(serverResponse => {
+                if(serverResponse.message) {
+                    throw new Error(serverResponse);
+                }
+                const transaction = db.transaction(['new_pizza'], 'readwrite');
+                const pizzaObjectStore = transaction.objectStore('new_pizza');
+
+                // clear all items in the store
+                pizzaObjectStore.clear();
+
+                alert('All saved pizza has been submitted!');
+            })
+            .catch(err => console.log(err));
+        }
+    }
+};
+
+// listen for app coming back online
+window.addEventListener('online', uploadPizza);
