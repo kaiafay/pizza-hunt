@@ -51,7 +51,7 @@ const pizzaController = {
     updatePizza({ params, body }, res) {
         // mongoose finds a single document and updates it
         // { new: true } tells mongoose to return the new/updated version of the document
-        Pizza.findOneAndUpdate({ _id: params.id }, body, { new: true })
+        Pizza.findOneAndUpdate({ _id: params.id }, body, { new: true, runValidators: true })
           .then(dbPizzaData => {
               if(!dbPizzaData) {
                   res.status(404).json({ message: 'No pizza found with this ID!' });
